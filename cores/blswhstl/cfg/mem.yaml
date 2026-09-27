@@ -29,6 +29,11 @@ audio:
     - { name: fm,   module: jt51,      rsum: 1k,            rc: [ { r: 609, c: 33n } ] }
     - { name: pcm,  module: jt053260,  rsum: 1k, pre: 1.74, rc: [ { r: 609, c: 33n } ] }
 
+# RetroAchievements tap driven by jtblswhstl_game (68000 work RAM + sprite RAM)
+ports:
+  - { name: ra_game_addr, msb: 15 }
+  - { name: ra_game_din,  msb: 15 }
+  - { name: ra_game_we,   msb: 1 }
 sdram:
   banks:
 

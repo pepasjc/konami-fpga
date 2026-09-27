@@ -32,6 +32,18 @@ assign oram_addr = conv13( main_addr[13:1] );
 assign oram_we   = {2{oram_cs & cpu_we}} & ~ram_dsn;
 assign oram_din  = cpu_dout;
 
+// RetroAchievements (JTFRAME_RA_TAP, mem.yaml ports ra_game_*). FinalBurn
+// Neo's d_tmnt.cpp "All Ram" for this board is 68000 RAM ($204000, 16 kB)
+// at 0, Z80 RAM 0x4000, palette 0x4800, sprite RAM ($300000, 16 kB, linear
+// 68000 order) at 0x5800. The 32 kB mirror holds the work RAM and the
+// sprite RAM, 68000 words as stored (mirror byte k = 68000 byte k^1).
+// ARM region table { ra_start, len, mirror_offset }:
+//   { 0x0000, 0x4000, 0x0000 }, { 0x5800, 0x4000, 0x4000 }
+wire ra_oram_we = oram_cs & cpu_we;
+assign ra_game_addr = { 1'b0, ~ram_we, main_addr[13:1], 1'b0 };
+assign ra_game_din  = cpu_dout;
+assign ra_game_we   = {2{ ram_we | ra_oram_we }} & ~ram_dsn;
+
 jtk054000 u_k054000(
     .rst    ( rst               ),
     .clk    ( clk               ),

@@ -46,6 +46,14 @@ JTFRAME_RELEASE
 # default EEPROM (ER5911) para que no arranque en error/al reves. asterix.nv en la .mra (Fase 5).
 JTFRAME_IOCTL_RD=128
 
+# RetroAchievements: FinalBurn Neo's d_asterix.cpp "All Ram" starts with the
+# 32 kB 68000 work RAM ($100000), which lives in SDRAM bank 0 at word
+# RAM_OFFSET = 0x100000 (mem.yaml). jtframe snoops the bank-0 writes there;
+# ARM region table { 0x0000, 0x8000, 0x0000 }.
+JTFRAME_RA_MIRROR
+JTFRAME_RA_WRAM=23'h100000
+JTFRAME_RA_AW=15
+
 [mister]
 JTFRAME_ARX=4
 JTFRAME_ARY=3

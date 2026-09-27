@@ -25,6 +25,11 @@ JTFRAME_MR_DDRLOAD
 
 JTFRAME_IOCTL_RD=128
 
+# RetroAchievements: work RAM + sprite RAM tapped in jtblswhstl_game (mem.yaml ports)
+JTFRAME_RA_MIRROR
+JTFRAME_RA_TAP
+JTFRAME_RA_AW=15
+
 [mister]
 
 JTFRAME_ARX=5
