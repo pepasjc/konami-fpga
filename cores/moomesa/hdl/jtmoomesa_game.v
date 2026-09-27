@@ -41,6 +41,31 @@ wire [ 1:0] oram_we;
 assign debug_view = debug_mux;
 assign ram_we     = cpu_we & ram_cs;
 assign ram_addr   = main_addr[15:1];
+
+// RetroAchievements (JTFRAME_RA_TAP, mem.yaml ports ra_game_*). FinalBurn
+// Neo's d_moo.cpp "All Ram" is 68000 work RAM ($180000, 64 kB) at 0, ...,
+// Z80 RAM at 0x39000. The moomesa set reads work RAM below 0x3400 and Z80
+// RAM byte 0x0E, so the 32 kB mirror holds work RAM 0x0000-0x7BFF and Z80
+// RAM 0xC000-0xC3FF. ARM region table { ra_start, len, mirror_offset }:
+//   { 0x00000, 0x7C00, 0x0000 }, { 0x39000, 0x0400, 0x7C00 }
+// 68000 words as stored (bits 15:8 = even byte), mirror byte k = 68000 byte
+// k^1; Z80 bytes as-is. A Z80 write waits while the 68000 writes.
+wire        ra_z_we;
+wire [12:0] ra_z_addr;
+wire [ 7:0] ra_z_dout;
+reg         ra_z_l = 0, ra_zp = 0;
+reg  [ 9:0] ra_za;
+reg  [ 7:0] ra_zd;
+wire        ra_m_we = ram_we && !main_addr[15] && main_addr[14:10] != 5'h1F;   // below 0x7C00
+always @(posedge clk) begin
+    ra_z_l <= ra_z_we;
+    if( ra_z_we && !ra_z_l && ra_z_addr[12:10]==0 ) begin
+        ra_zp <= 1; ra_za <= ra_z_addr[9:0]; ra_zd <= ra_z_dout;
+    end else if( !ra_m_we ) ra_zp <= 0;
+end
+assign ra_game_addr = ra_m_we ? { 1'b0, main_addr[14:1], 1'b0 } : { 6'h1F, ra_za };
+assign ra_game_din  = ra_m_we ? ram_din : { 2{ ra_zd } };
+assign ra_game_we   = ra_m_we ? ~ram_dsn : ra_zp ? ( ra_za[0] ? 2'b10 : 2'b01 ) : 2'b00;
 assign video_dumpa= ioctl_addr[15:0]-16'h80; // subtract NVRAM offset
 
 always @(posedge clk) begin
@@ -262,7 +287,10 @@ cowboys_sound u_sound(
     .pcm_r      ( pcm_r         ),
     // Debug
     .debug_bus  ( debug_bus     ),
-    .st_dout    ( st_snd        )
+    .st_dout    ( st_snd        ),
+    .ra_z_we    ( ra_z_we       ),
+    .ra_z_addr  ( ra_z_addr     ),
+    .ra_z_dout  ( ra_z_dout     )
 );
 
 endmodule

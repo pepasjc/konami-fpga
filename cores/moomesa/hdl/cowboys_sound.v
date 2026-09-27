@@ -50,7 +50,11 @@ module cowboys_sound(
     output     signed [15:0] pcm_l, pcm_r,  // K054539 PCM puro, trim vivo debug_bus[7:4] (en el modulo)
     // Debug
     input    [ 7:0] debug_bus,
-    output   [ 7:0] st_dout
+    output   [ 7:0] st_dout,
+    // RetroAchievements tap: Z80 writes into its 8 kB RAM at 0xC000
+    output          ra_z_we,
+    output   [12:0] ra_z_addr,
+    output   [ 7:0] ra_z_dout
 );
 
 assign main_din = 0;
@@ -86,6 +90,9 @@ assign int_n    = latch_intn;
 assign nmi_trig = fm_intn;
 assign nmi_clr  = nmi_clrr;
 assign latch_we = k21_cs && !wr_n;
+assign ra_z_we   = ram_cs && !wr_n;
+assign ra_z_addr = A[12:0];
+assign ra_z_dout = cpu_dout;
 assign rom_hi   = A[15]? bank : {3'd0, A[14]};
 assign rom_addr = {rom_hi[2:0], A[13:0]};
 assign cpu_din  = rom_cs ? rom_data   :

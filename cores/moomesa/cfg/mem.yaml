@@ -28,6 +28,11 @@ audio:
   channels:                     # y el vpp de cada modulo (jt51 0.5, jt054539 1.0) da el balance fisico.
     - { name: fm,   module: jt51,     rsum: 1k, rc: [ { r: 4.7k, c: 2.2n } ] }
     - { name: pcm,  module: jt054539, rsum: 1k, rc: [ { r: 4.7k, c: 2.2n } ] }
+# RetroAchievements tap driven by jtmoomesa_game (68000 work RAM + Z80 RAM)
+ports:
+  - { name: ra_game_addr, msb: 15 }
+  - { name: ra_game_din,  msb: 15 }
+  - { name: ra_game_we,   msb: 1 }
 sdram:
   banks:
     - buses:
